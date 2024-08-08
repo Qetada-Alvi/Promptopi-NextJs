@@ -10,22 +10,29 @@ const UpdatePrompt = () => {
   const searchParams = useSearchParams();
   const promptId = searchParams.get("id");
 
-  const [post, setPost] = useState({ prompt: "", tag: "", });
+  const [post, setPost] = useState({ prompt: "", tag: "" });
   const [submitting, setIsSubmitting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const getPromptDetails = async () => {
-      const response = await fetch(`/api/prompt/${promptId}`);
-      const data = await response.json();
+    setIsMounted(true);
+  }, []);
 
-      setPost({
-        prompt: data.prompt,
-        tag: data.tag,
-      });
-    };
+  useEffect(() => {
+    if (isMounted && promptId) {
+      const getPromptDetails = async () => {
+        const response = await fetch(`/api/prompt/${promptId}`);
+        const data = await response.json();
 
-    if (promptId) getPromptDetails();
-  }, [promptId]);
+        setPost({
+          prompt: data.prompt,
+          tag: data.tag,
+        });
+      };
+
+      getPromptDetails();
+    }
+  }, [isMounted, promptId]);
 
   const updatePrompt = async (e) => {
     e.preventDefault();
@@ -52,9 +59,11 @@ const UpdatePrompt = () => {
     }
   };
 
+  if (!isMounted) return null;
+
   return (
     <Form
-      type='Edit'
+      type="Edit"
       post={post}
       setPost={setPost}
       submitting={submitting}
